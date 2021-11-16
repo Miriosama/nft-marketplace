@@ -38,6 +38,10 @@ const NftPage = ({ user, NFT, capsValue }: NFTPageProps) => {
   }, []);
 
   useEffect(() => {
+    setUserFromDApp(setWalletUser)
+  }, []);
+
+  useEffect(() => {
     async function callBack() {
       try {
         let res = await fetch(NFT.properties?.preview.ipfs!, { method: 'HEAD' });

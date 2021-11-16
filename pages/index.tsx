@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import Head from 'next/head';
+import { NftType, UserType } from 'interfaces';
+import React, { useEffect, useState } from 'react';
+import { decryptCookie, setUserFromDApp } from 'utils/cookie';
+import { getUser, getUsers } from 'actions/user';
+
 import BetaBanner from 'components/base/BetaBanner';
-import MainHeader from 'components/base/MainHeader';
+import Head from 'next/head';
 import Landing from 'components/pages/Landing';
+import MainHeader from 'components/base/MainHeader';
+import { NextPageContext } from 'next';
 import TernoaWallet from 'components/base/TernoaWallet';
 import arrayShuffle from 'array-shuffle';
 import cookies from 'next-cookies';
-
 import { getCapsValue } from 'actions/caps';
-import { getUser, getUsers } from 'actions/user';
 import { getNFTs } from 'actions/nft';
-import { NftType, UserType } from 'interfaces';
-import { NextPageContext } from 'next';
-import { decryptCookie, setUserFromDApp } from 'utils/cookie';
 
 export interface LandingProps {
   user: UserType;
@@ -38,9 +38,9 @@ const LandingPage = ({
   const [walletUser, setWalletUser] = useState(user);
 
   useEffect(() => {
-    setUserFromDApp(setWalletUser)
+    setUserFromDApp(setWalletUser);
   }, []);
-  
+
   return (
     <>
       <Head>
@@ -86,7 +86,7 @@ export async function getServerSideProps(ctx: NextPageContext) {
   const promises = [];
   promises.push(
     new Promise<void>((success) => {
-      getUsers(undefined,true)
+      getUsers(undefined, true)
         .then((result) => {
           users = result.data;
           success();
@@ -116,16 +116,23 @@ export async function getServerSideProps(ctx: NextPageContext) {
         .catch(success);
     })
   );
-  promises.push(new Promise<void>((success) => {
-    getCapsValue().then(_value => {
-      capsValue = _value
-      success();
-    }).catch(success);
-  }));
+  promises.push(
+    new Promise<void>((success) => {
+      getCapsValue()
+        .then((_value) => {
+          capsValue = _value;
+          success();
+        })
+        .catch(success);
+    })
+  );
   await Promise.all(promises);
   users = arrayShuffle(users);
   let popularNfts = arrayShuffle((regularNfts || []).slice(0, 8));
-  let heroNFTs = popularNfts.length > 3 ? arrayShuffle(popularNfts).slice(0, 3) : popularNfts; // TODO: Fetch dedicated data
+  let heroNFTs =
+    popularNfts.length > 3
+      ? arrayShuffle(popularNfts).slice(0, 3)
+      : popularNfts; // TODO: Fetch dedicated data
   let bestSellingNfts = arrayShuffle((regularNfts || []).slice(8, 16));
   let NFTCreators = arrayShuffle((regularNfts || []).slice(16, 19));
   let totalCountNFT = (regularNfts || []).length;
